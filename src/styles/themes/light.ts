@@ -6,7 +6,7 @@ export default {
 
   colors: {
     primary: '#ff9033',
-    secundary: 'linear-gradient(270deg, #FFE53B 0%, #FF2525 100%)',
+    secondary: 'linear-gradient(270deg, #FFE53B 0%, #FF2525 100%)',
 
     background: '#232129',
     backgroundLight: '#f4ede8',
