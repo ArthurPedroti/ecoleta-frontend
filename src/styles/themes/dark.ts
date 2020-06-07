@@ -8,7 +8,7 @@ export default {
     primary: '#34CB79',
     secondary: '#322153',
 
-    background: '#232129',
+    background: '#F0F0F5',
     backgroundLight: '#F0F0F5',
     error: '#c53030',
     success: '#e6fffa',
@@ -16,6 +16,6 @@ export default {
     li: '#232129',
     text: '#6C6C80',
     inputColor: '#FFFFFF',
-    inputPlaceholder: '#666360',
+    inputPlaceholder: '#6C6C80',
   },
 };
