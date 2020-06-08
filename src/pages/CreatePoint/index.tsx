@@ -2,10 +2,18 @@ import React, { useRef } from 'react';
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import { Link } from 'react-router-dom';
-import { FiArrowLeft, FiHome, FiMail, FiPhone } from 'react-icons/fi';
+import {
+  FiArrowLeft,
+  FiHome,
+  FiMail,
+  FiPhone,
+  FiMapPin,
+  FiMap,
+} from 'react-icons/fi';
 
 import logo from '../../assets/logo.svg';
 import Input from '../../components/Input';
+import Select from '../../components/Select';
 
 import { Container, Header, ItemsGrid, FieldGroup } from './styles';
 
@@ -58,19 +66,17 @@ const CreatePoint: React.FC = () => {
             <span>Selecione o endereço no mapa</span>
           </legend>
           <FieldGroup>
-            <Input
-              name="uf"
-              icon={FiMail}
-              type="email"
-              placeholder="Estado (UF)"
-            />
-            <Input
+            <Select name="uf" icon={FiMapPin} placeholder="Estado (UF)">
+              <option value="0">Selecione uma UF</option>
+            </Select>
+            <Select
               containerStyle={{ marginTop: 0, marginLeft: 8 }}
               name="city"
-              icon={FiPhone}
-              type="text"
+              icon={FiMap}
               placeholder="Cidade"
-            />
+            >
+              <option value="0">Selecione uma cidade</option>
+            </Select>
           </FieldGroup>
         </fieldset>
 

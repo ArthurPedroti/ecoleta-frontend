@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { shade, lighten, transparentize } from 'polished';
+import { shade, transparentize } from 'polished';
 
 export const Container = styled.div`
   width: 100%;
