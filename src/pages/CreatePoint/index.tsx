@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import { Link } from 'react-router-dom';
+
 import {
   FiArrowLeft,
   FiHome,
@@ -14,6 +15,7 @@ import {
 import logo from '../../assets/logo.svg';
 import Input from '../../components/Input';
 import Select from '../../components/Select';
+import Map from '../../components/Map';
 
 import { Container, Header, ItemsGrid, FieldGroup } from './styles';
 
@@ -28,7 +30,13 @@ const CreatePoint: React.FC = () => {
           Voltar para home
         </Link>
       </Header>
-      <Form ref={formRef} onSubmit={() => {}}>
+
+      <Form
+        ref={formRef}
+        onSubmit={() => {
+          console.log('opa');
+        }}
+      >
         <h1>
           Cadastro do <br /> ponto de coleta
         </h1>
@@ -65,6 +73,14 @@ const CreatePoint: React.FC = () => {
             <h2>Endereço</h2>
             <span>Selecione o endereço no mapa</span>
           </legend>
+          {/* <Map center={[-22.2072851, -46.757523]} zoom={15}>
+            <TileLayer
+              attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={[-22.2072851, -46.757523]} />
+          </Map> */}
+          <Map />
           <FieldGroup>
             <Select name="uf" icon={FiMapPin} placeholder="Estado (UF)">
               <option value="0">Selecione uma UF</option>
