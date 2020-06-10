@@ -44,10 +44,16 @@ interface IibgeCityResponse {
   nome: string;
 }
 
-interface SignUpFormData {
+interface CreatePointFormData {
   name: string;
   email: string;
-  password: string;
+  city: string;
+  map: {
+    lat: number;
+    lng: number;
+  };
+  tel: string;
+  uf: string;
 }
 
 const CreatePoint: React.FC = () => {
@@ -56,6 +62,7 @@ const CreatePoint: React.FC = () => {
   const [ufs, setUfs] = useState<string[]>([]);
   const [selectedUF, setSelectedUF] = useState('0');
   const [cities, setCities] = useState<string[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const { addToast } = useToast();
   const history = useHistory();
 
@@ -102,9 +109,8 @@ const CreatePoint: React.FC = () => {
   );
 
   const handleSubmit = useCallback(
-    async (data: object) => {
+    async (data: CreatePointFormData) => {
       try {
-        console.log(data);
         formRef.current?.setErrors({});
 
         const schema = Yup.object().shape({
@@ -112,21 +118,37 @@ const CreatePoint: React.FC = () => {
           email: Yup.string()
             .required('E-mail obrigatório')
             .email('Digite um e-mail válido'),
-          password: Yup.string().min(6, 'No mínimo 6 digitos'),
+          tel: Yup.string().required('Whatsapp obrigatório'),
+          uf: Yup.string().notOneOf(['0'], 'Estado obrigatório'),
+          city: Yup.string().notOneOf(['0'], 'Cidade obrigatória'),
         });
 
         await schema.validate(data, {
           abortEarly: false,
         });
 
-        await api.post('/users', data);
+        const { name, email, tel, map, city, uf } = data;
+
+        const totalData = {
+          name,
+          email,
+          tel,
+          latitude: map.lat,
+          longitude: map.lng,
+          city,
+          uf,
+          items: selectedItems,
+        };
+
+        await api.post('/points', totalData);
 
         history.push('/');
 
         addToast({
           type: 'success',
           title: 'Cadastro realizado!',
-          description: 'Você já pode fazer seu logon do Template!',
+          description:
+            'Você já pode ver o seu ponto de coleta no nosso aplicativo!',
         });
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
@@ -142,7 +164,22 @@ const CreatePoint: React.FC = () => {
         });
       }
     },
-    [addToast, history],
+    [addToast, history, selectedItems],
+  );
+
+  const handleSelectItem = useCallback(
+    (id: string) => {
+      const alreadySelected = selectedItems.findIndex(item => item === id);
+
+      if (alreadySelected >= 0) {
+        const filteredItems = selectedItems.filter(item => item !== id);
+
+        setSelectedItems(filteredItems);
+      } else {
+        setSelectedItems([...selectedItems, id]);
+      }
+    },
+    [selectedItems],
   );
 
   return (
@@ -232,9 +269,14 @@ const CreatePoint: React.FC = () => {
 
           <ItemsGrid>
             {items.map(item => (
-              <li key={item.id}>
+              <li
+                key={item.id}
+                onKeyPress={() => handleSelectItem(item.id)}
+                onClick={() => handleSelectItem(item.id)}
+                className={selectedItems.includes(item.id) ? 'selected' : ''}
+              >
                 <img src={item.image_url} alt={item.title} />
-                <span>Óleo de Cozinha</span>
+                <span>{item.title}</span>
               </li>
             ))}
           </ItemsGrid>

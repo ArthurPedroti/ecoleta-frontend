@@ -6,6 +6,7 @@ export const Container = styled.div`
   max-width: 1100px;
 
   margin: 0 auto;
+  padding: 0 30px;
 
   form {
     margin: 80px auto;
@@ -18,6 +19,7 @@ export const Container = styled.div`
     flex-direction: column;
 
     h1 {
+      color: ${props => props.theme.colors.secondary};
       font-size: 36px;
     }
 
@@ -35,6 +37,7 @@ export const Container = styled.div`
       margin-bottom: 40px;
 
       h2 {
+        color: ${props => props.theme.colors.secondary};
         font-size: 24px;
       }
 

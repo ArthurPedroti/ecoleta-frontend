@@ -4,7 +4,16 @@ import background from '../../assets/home-background.svg';
 
 export const Container = styled.div`
   height: 100vh;
-  background: url(${background}) no-repeat 700px bottom;
+  position: relative;
+  margin: 0 auto;
+  max-width: 1920px;
+
+  > img {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: -99;
+  }
 
   @media (max-width: 900px) {
     align-items: center;
@@ -18,6 +27,7 @@ export const Content = styled.div`
   max-width: 1100px;
   margin: 0 auto;
   padding: 0 30px;
+  /* background: url(${background}) no-repeat 400px bottom; */
 
   display: flex;
   flex-direction: column;

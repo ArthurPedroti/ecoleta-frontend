@@ -38,6 +38,7 @@
     "no-unused-expressions": "off",
     "import/no-duplicates": "off",
     "@typescript-eslint/camelcase": "off",
+    "jsx-a11y/no-noninteractive-element-interactions": "off",
     "react/jsx-filename-extension": [
       1,
       {

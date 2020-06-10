@@ -4,11 +4,13 @@ import { FiLogIn } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { Container, Content, Header, Main } from './styles';
 
+import background from '../../assets/home-background.svg';
 import logo from '../../assets/logo.svg';
 
 const Home: React.FC = () => {
   return (
     <Container>
+      <img src={background} alt="Ecoleta" />
       <Content>
         <Header>
           <img src={logo} alt="Ecoleta" />

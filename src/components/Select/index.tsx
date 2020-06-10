@@ -39,7 +39,11 @@ const Select: React.FC<InputProps> = ({
   const handleInputBlur = useCallback(() => {
     setIsFocused(false);
 
-    setIsFilled(!!inputRef.current?.value);
+    if (inputRef.current?.value === '0') {
+      setIsFocused(false);
+    } else {
+      setIsFilled(!!inputRef.current?.value);
+    }
   }, []);
 
   useEffect(() => {

@@ -19,9 +19,14 @@ export default createGlobalStyle`
     font-size: 16px;
   }
 
-  h1, h2, h3, h4, h5, h6, strong {
-    color:${props => props.theme.colors.secondary};
-    font-family: Ubuntu;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  strong {
+    font-family: 'Ubuntu';
     font-weight: 500;
   }
 
