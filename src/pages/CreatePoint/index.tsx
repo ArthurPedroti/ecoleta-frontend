@@ -1,7 +1,14 @@
-import React, { useRef } from 'react';
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+  ChangeEvent,
+} from 'react';
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
+import * as Yup from 'yup';
 
 import {
   FiArrowLeft,
@@ -12,15 +19,132 @@ import {
   FiMap,
 } from 'react-icons/fi';
 
+import axios from 'axios';
+import getValidationErrors from '../../utils/getValidationErrors';
 import logo from '../../assets/logo.svg';
 import Input from '../../components/Input';
 import Select from '../../components/Select';
 import Map from '../../components/Map';
+import { useToast } from '../../hooks/toast';
 
 import { Container, Header, ItemsGrid, FieldGroup } from './styles';
+import api from '../../services/api';
+
+interface Item {
+  id: string;
+  title: string;
+  image_url: string;
+}
+
+interface IibgeUFResponse {
+  sigla: string;
+}
+
+interface IibgeCityResponse {
+  nome: string;
+}
+
+interface SignUpFormData {
+  name: string;
+  email: string;
+  password: string;
+}
 
 const CreatePoint: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
+  const [items, setItems] = useState<Item[]>([]);
+  const [ufs, setUfs] = useState<string[]>([]);
+  const [selectedUF, setSelectedUF] = useState('0');
+  const [cities, setCities] = useState<string[]>([]);
+  const { addToast } = useToast();
+  const history = useHistory();
+
+  useEffect(() => {
+    api.get('items').then(response => {
+      setItems(response.data);
+    });
+  }, []);
+
+  useEffect(() => {
+    axios
+      .get<IibgeUFResponse[]>(
+        'https://servicodados.ibge.gov.br/api/v1/localidades/estados',
+      )
+      .then(response => {
+        const ufInitials = response.data.map(uf => uf.sigla);
+
+        setUfs(ufInitials);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (selectedUF === '0') {
+      return;
+    }
+    axios
+      .get<IibgeCityResponse[]>(
+        `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedUF}/municipios`,
+      )
+      .then(response => {
+        const cityNames = response.data.map(city => city.nome);
+
+        setCities(cityNames);
+      });
+  }, [selectedUF]);
+
+  const handleSelectUf = useCallback(
+    (event: ChangeEvent<HTMLSelectElement>) => {
+      const uf = event.target.value;
+
+      setSelectedUF(uf);
+    },
+    [],
+  );
+
+  const handleSubmit = useCallback(
+    async (data: object) => {
+      try {
+        console.log(data);
+        formRef.current?.setErrors({});
+
+        const schema = Yup.object().shape({
+          name: Yup.string().required('Nome obrigatório'),
+          email: Yup.string()
+            .required('E-mail obrigatório')
+            .email('Digite um e-mail válido'),
+          password: Yup.string().min(6, 'No mínimo 6 digitos'),
+        });
+
+        await schema.validate(data, {
+          abortEarly: false,
+        });
+
+        await api.post('/users', data);
+
+        history.push('/');
+
+        addToast({
+          type: 'success',
+          title: 'Cadastro realizado!',
+          description: 'Você já pode fazer seu logon do Template!',
+        });
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err);
+          formRef.current?.setErrors(errors);
+          return;
+        }
+
+        addToast({
+          type: 'error',
+          title: 'Erro no cadastro',
+          description: 'Ocorreu um erro ao fazer o cadastro, tente novamente.',
+        });
+      }
+    },
+    [addToast, history],
+  );
+
   return (
     <Container>
       <Header>
@@ -31,12 +155,7 @@ const CreatePoint: React.FC = () => {
         </Link>
       </Header>
 
-      <Form
-        ref={formRef}
-        onSubmit={() => {
-          console.log('opa');
-        }}
-      >
+      <Form ref={formRef} onSubmit={handleSubmit}>
         <h1>
           Cadastro do <br /> ponto de coleta
         </h1>
@@ -73,17 +192,21 @@ const CreatePoint: React.FC = () => {
             <h2>Endereço</h2>
             <span>Selecione o endereço no mapa</span>
           </legend>
-          {/* <Map center={[-22.2072851, -46.757523]} zoom={15}>
-            <TileLayer
-              attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <Marker position={[-22.2072851, -46.757523]} />
-          </Map> */}
           <Map />
-          <FieldGroup>
-            <Select name="uf" icon={FiMapPin} placeholder="Estado (UF)">
+          <FieldGroup style={{ marginTop: 10 }}>
+            <Select
+              onChange={handleSelectUf}
+              value={selectedUF}
+              name="uf"
+              icon={FiMapPin}
+              placeholder="Estado (UF)"
+            >
               <option value="0">Selecione uma UF</option>
+              {ufs.map(uf => (
+                <option key={uf} value={uf}>
+                  {uf}
+                </option>
+              ))}
             </Select>
             <Select
               containerStyle={{ marginTop: 0, marginLeft: 8 }}
@@ -92,6 +215,11 @@ const CreatePoint: React.FC = () => {
               placeholder="Cidade"
             >
               <option value="0">Selecione uma cidade</option>
+              {cities.map(city => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
             </Select>
           </FieldGroup>
         </fieldset>
@@ -103,30 +231,12 @@ const CreatePoint: React.FC = () => {
           </legend>
 
           <ItemsGrid>
-            <li className="selected">
-              <img src="http://localhost:3333/files/oleo.svg" alt="Óleo" />
-              <span>Óleo de Cozinha</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/files/oleo.svg" alt="Óleo" />
-              <span>Óleo de Cozinha</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/files/oleo.svg" alt="Óleo" />
-              <span>Óleo de Cozinha</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/files/oleo.svg" alt="Óleo" />
-              <span>Óleo de Cozinha</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/files/oleo.svg" alt="Óleo" />
-              <span>Óleo de Cozinha</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/files/oleo.svg" alt="Óleo" />
-              <span>Óleo de Cozinha</span>
-            </li>
+            {items.map(item => (
+              <li key={item.id}>
+                <img src={item.image_url} alt={item.title} />
+                <span>Óleo de Cozinha</span>
+              </li>
+            ))}
           </ItemsGrid>
         </fieldset>
 
